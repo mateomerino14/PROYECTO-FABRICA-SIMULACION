@@ -1,6 +1,7 @@
 ==========PROYECTO DE SIMULACIÓN Y OPTIMIZACIÓN DE FÁBRICA==========
 
 ====DESCRIPCIÓN====
+
 Este proyecto implementa un sistema completo de simulación y optimización para una fábrica, modelando máquinas, producción, asignación de operarios, costos de materiales, precios de venta, ganancias y redes de transporte. 
 Desarrollado en Python, aplica algoritmos clásicos de optimización y teoría de grafos para maximizar la eficiencia productiva.
 
