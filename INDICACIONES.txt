@@ -1,0 +1,47 @@
+INDICACIONES
+
+1)Se llega a crear un objeto de tipo fabrica, el cual requiere de una cantidad de horas diarias que trabajara la fabrica
+	maquila = Fabrica(7) #Estableciendo que la fabrica trabaja 7 horas diarias
+2)Se llega a subir los archivos jason necesarios, con las configuraciones de las maquinas, trazas de los productos necesarias, empleados en cada seccion de la fabrica, etc.
+	maquila.load_machines_from_json("prueba_1_machines.json")
+	maquila.load_trace_from_json("prueba_1_trace.json")
+	maquila.load_raw_material_cost_from_json("prueba_1_material_costs.json")
+	maquila.leer_red_Secciones_Fabrica_json("redTransporteSecciones.json")
+	maquila.machines_optimizer_from_json('prueba_1_operators.json')
+3)Despues de haber cargado las configuraciones necesarias, es posible llamar a los metodos necesarios:
+
+-Brinda las trazas de cada tipo de productos
+	maquila.Trace
+
+-Brinda todos los materiales utilizados en la fabricacion de los productos totales
+	maquila.materials()
+
+-Brinda el costo o dinero invertido en la fabricacion de los productos, solo uno de cada producto
+	maquila.cost()
+
+-Se carga en la clase los precios de venta del producto, es decir a cuanto se vende
+	maquila.load_sell_prices_from_json("prueba_1_sell_prices.json")
+
+-Calcula las ganancias que genera cada tipo de producto, restando a cuanto se vende cada producto menos cuanto cuesta generar cada producto
+	maquila.profit()
+
+-Se calcula la cantidad de productos que genera una secccion especifica con sus maquinas y empleados en un tiempo dado
+	maquila.production_by_time("corte","corte de tela para camisa",4)
+
+-Se calcula el timpo en el que genera una secccion especifica con sus maquinas y empleados, dada una cierta cantidad de productos
+	maquila.production_by_object("corte","corte de tela para camisa",31)
+
+-Optiene la mejor organizacion de empleados a las maquinas en una seccion, basado en las habilidades de los empleados y una funcion de crecimiento de cuanto crece la productividad basada en la cantidad de empleados
+	maquila.machines_optimizer_from_json('prueba_1_operators.json')
+
+-Crea un grafo con las capacidades de cada seccion como el peso de las aristas, las conexiones reflejan las trazas o configuraciones por las que tienen que pasar cada tipo de producto y los nodos son las configuraciones de cada maquina para cada tipo de producto.
+Posteriormente aplico el algoritmo de Ford Fulkerson para identificar en que secciones sobran objetos y asi poder despedir empleados o reducir la velocidad de produccion de las maquinas o retirar maquinas, con el objetivo de que en el grafo residual las capacidades de mis secciones queden aproximados a cero
+    -Retorna la lista de maquinas, con sus empleados antes de la optimizacion y el flujo de productos.
+    -Retorna la nueva lista de maquinas, con sus empleados despues de la optimizacion y el flujo de productos que deberia ser igual al anterior.
+	maquila.cantidadProductosDiaria()
+
+-Como ya se obtuvo la cantidad de productos maxima producida diariamente, se recibe dos fechas y la cantidad de feriados entre esas fechas, con la finalidad de calcular la produccion en un periodo de tiempo
+	maquila.produccionProductosPorTiempo("2024-05-01","2024-05-04",0)
+
+-Se crea un grafo con la red de transporte de la fabrica y se aplica prim para obtener el grafo con los caminos mas cortos entre secciones, correspondiente a un arbol de expansion minimo
+	maquila.crearGrafoMinimoTransporte()
