@@ -15,7 +15,7 @@ import math
 # ============================================
 # CREACION DE LA FUNCION PARA DESCOMPRIMIR EL ARCHIVO CON LAS CONFIGURACIONES NECESARIAS
 # ============================================
-DATA_DIR = "C:\\Users\\MAT\\Pictures\\PROYECTO_GRAFOS\\data"
+DATA_DIR = "C:\\Users\\MAT\\Pictures\\PROYECTO_SEMESTRAL_GRAFOS\\data"
 CONFIG_ZIP = os.path.join(DATA_DIR, "configurations.zip")
 def setup_environment():
     if not os.path.exists(DATA_DIR):
@@ -322,50 +322,48 @@ class Fabrica:
 
     def load_machines_from_json(self, file_name):
         self.Machines = dict()
+        
+        # Obtener el directorio base donde está el archivo machines.json
+        base_dir = os.path.dirname(file_name)
+        
         with open(file_name, "r") as f:
             D = json.load(f)
-  #Se itera sobre cada tipo de maquina en el jason machines.jason
             for x in D:
-              #Se le añade una nueva seccion al diccionario Machines, el cual hasheara el tipo de maquina con una lista que cntendra listas con el nombre de cada maquina y la maquina creada con su configuracion
                 self.Machines[x] = []
-              #Se obtiene el nombre de cada archivo jason en el tipo de maquina especifico, ya que cada archivo contiene las configuraciones especificas
                 for fileM in D[x]:
-                  #Se lee el archivo jason con el nombre obtenido en fileM
-                    with open(fileM, "r") as g:
-                      #Se descomprime el archivo, el cual contiene las configuraciones especificas y se crea con esas configuraciones un objeto del tipo Maquina
+                    # Construir la ruta completa al archivo de la máquina
+                    machine_path = os.path.join(base_dir, fileM)
+                    if not os.path.exists(machine_path):
+                        print(f"ADVERTENCIA: No se encuentra {machine_path}")
+                        print(f"Buscando en: {base_dir}")
+                        print(f"Archivos disponibles: {os.listdir(base_dir)}")
+                    with open(machine_path, "r") as g:
                         u = json.load(g)
-                        # u.pop("Configuration")
                         M = Machine(**u)
-                      #Se añade a Machines el nombre del archivo jason que contiene esas configuraciones y la maquina creada con esas configuraciones
-                        self.Machines[x].append( [fileM,M] )
+                        self.Machines[x].append([fileM, M])
 
     #Se crea un metodo para exportar la información de las máquinas contenida en la instancia de una clase a un archivo JSON
     def export_machines_to_json(self, file_name, prefix=""):
-      #verifica si la instancia tiene datos en el atributo Machines
         if not self.Machines:
-          #Si Machines está vacío o no tiene datos, lanza una excepción
             raise Exception("No machines data to export. Load machines data first.")
-        #En caso de que haya informacion, se crea un diccionario vacio
         machines_data = {}
-        #Se itera sobre el nombre de cada maquina como corte y mediante esta tambien se guarda la lista con el nombre de las maquinas
         for machine_name, machine_list in self.Machines.items():
-            machines_data[machine_name] = [ prefix + file_path for file_path, _ in machine_list]
-        #Se escribe el diccionario con la informacion de las maquinas
+            # Guardar solo los nombres de archivo sin prefijo adicional
+            machines_data[machine_name] = [file_path for file_path, _ in machine_list]
         with open(file_name, "w") as f:
-            json.dump(machines_data, f)
+            json.dump(machines_data, f, indent=4)
 
      #Se crea un metodo para exportar la información de las instancias de las máquinas en un archivo JSON
-    def export_machine_instances_to_json(self, prefix):
-      #verifica si la instancia tiene datos en el atributo Machines
+    def export_machine_instances_to_json(self, prefix=""):
         if not self.Machines:
-          #En caso de no tenerla, se lanza una excepcion
             raise Exception("No machines data to export. Load machines data first.")
-        #Caso contrario, sigue con el proceso y se itera sobre cada tipo de maquina con su lista de maquinas hasheada
         for machine_name, machine_list in self.Machines.items():
-          #Se accede de la lista de maquinas que es una dupla
             for file_name, instance_machine in machine_list:
-                #Se llama en cada instancia al metodo export_to_jason, para almacenar en archivo jason la informacion de cada maquina, enviandole como nombre del archivo el file_name extraido de la dupla
-                instance_machine.export_to_json( prefix+"_"+file_name)
+                if prefix:
+                    output_file = f"{prefix}_{file_name}"
+                else:
+                    output_file = file_name
+                instance_machine.export_to_json(output_file)
 
 
 
@@ -867,24 +865,24 @@ if __name__=="__main__":
     # CARGANDO CONFIGURACION INICIAL DE ARCHIVO
     # ============================================
     setup_environment()
-
+    CONFIG_DIR = os.path.join(DATA_DIR, "configurations")
     # ============================================
     # EJECUCION DE PRUEBA DEL FLUJO DE PRODUCTIVIDAD DE UNA FABRICA, ESTABLECIENDO LAS CONDICIONES NECESARIAS COMO HORARIOS, CAPACIDAD, ETC
     # ============================================
     maquila = Fabrica(7) #Estableciendo que la fabrica trabaja 7 horas diarias
-    maquila.load_machines_from_json(os.path.join(DATA_DIR, "prueba_1_machines.json"))
-    maquila.load_trace_from_json(os.path.join(DATA_DIR, "prueba_1_trace.json"))
-    maquila.load_raw_material_cost_from_json(os.path.join(DATA_DIR, "prueba_1_material_costs.json"))
-    maquila.leer_red_Secciones_Fabrica_json(os.path.join(DATA_DIR, "redTransporteSecciones.json"))
-    maquila.machines_optimizer_from_json(os.path.join(DATA_DIR, 'prueba_1_operators.json'))
+    maquila.load_machines_from_json(os.path.join(CONFIG_DIR, "prueba_1_machines.json"))
+    maquila.load_trace_from_json(os.path.join(CONFIG_DIR, "prueba_1_trace.json"))
+    maquila.load_raw_material_cost_from_json(os.path.join(CONFIG_DIR,"prueba_1_material_costs.json"))
+    maquila.leer_red_Secciones_Fabrica_json(os.path.join(CONFIG_DIR,"redTransporteSecciones.json"))
+    maquila.machines_optimizer_from_json(os.path.join(CONFIG_DIR,"prueba_1_operators.json"))
     maquila.Trace
     maquila.materials()
     maquila.cost()
-    maquila.load_sell_prices_from_json("prueba_1_sell_prices.json")
+    maquila.load_sell_prices_from_json(os.path.join(CONFIG_DIR, "prueba_1_sell_prices.json"))
     maquila.profit()
     maquila.production_by_time("corte","corte de tela para camisa",4)
     maquila.production_by_object("corte","corte de tela para camisa",31)
-    maquila.machines_optimizer_from_json('prueba_1_operators.json')
+    maquila.machines_optimizer_from_json(os.path.join(CONFIG_DIR,'prueba_1_operators.json'))
     maquila.OPTIMAL_MACHINES
     """Fijarse los empleados en la seccion de Recta para ver la variacion"""
     maquila.cantidadProductosDiaria()
@@ -910,7 +908,6 @@ if __name__=="__main__":
     nx.draw_networkx_edge_labels(G, pos, edge_labels=labels)
     plt.title('Red de Transporte Original')
     plt.show()
-
 
     # ============================================
     # GRAFICA DE LA RED DE TRANSPORTE MINIMA
